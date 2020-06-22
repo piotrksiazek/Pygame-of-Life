@@ -38,13 +38,22 @@ class Population:
 
     def pre_populate_events(self):
         for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.QUIT:
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                # Getting x and y coordinate of coursor and translating it into individual cell position
                 x, y = pygame.mouse.get_pos()
                 pos_x, pos_y = int(x/self.cell_size), int(y/self.cell_size)
+                # If cell is alive then it's status will become dead
                 if self.grid[pos_y][pos_x].status == 1:
                     self.grid[pos_y][pos_x].status = 0
+                # If cell is dead then it's status will become alive
                 else:
                     self.grid[pos_y][pos_x].status = 1
+            elif event.type == pygame.KEYDOWN:
+                # Press space to start the game
+                if event.key == pygame.K_SPACE:
+                    self.not_ready = False
 
     def pre_game(self):
         while self.not_ready:
@@ -56,7 +65,7 @@ class Population:
                         pygame.draw.rect(self.screen, self.settings.alive_color, cell_rect)
                     else:
                         pygame.draw.rect(self.screen, self.settings.dead_color, cell_rect)
-                    pygame.display.flip()
+            pygame.display.flip()
 
     def draw_grid(self, screen):
         #(left,top,width,height)
@@ -156,8 +165,9 @@ class GameOfLife:
         population = Population()
         # population.pre_game()
         while True:
+            pygame.time.delay(100)
             self.check_events()
-            # population.pre_game()
+            population.pre_game()
             next_gen = population.draw_grid(self.screen)
             population.grid = next_gen
             pygame.display.flip()
