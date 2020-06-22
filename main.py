@@ -193,10 +193,15 @@ class GameOfLife:
         self.settings = Settings()
         self.screen = pygame.display.set_mode((self.settings.scr_width, self.settings.scr_height))
 
-    def check_events(self):
+    def check_events(self, population):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                # This lets us pause the game and modify living and dead cells
+                if event.key == pygame.K_SPACE:
+                    population.ready = False
+                    population.pre_game()
 
     def main(self):
         population = Population()
@@ -205,7 +210,7 @@ class GameOfLife:
         population.pre_game()
         while True:
             pygame.time.delay(100)
-            self.check_events()
+            self.check_events(population)
             next_gen = population.draw_grid(self.screen)
             population.grid = next_gen
             pygame.display.flip()
