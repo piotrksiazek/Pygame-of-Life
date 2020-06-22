@@ -8,7 +8,7 @@ from settings import Settings
 class Cell:
     """Class that stores state of each individual cell"""
     def __init__(self):
-        self.status = 0
+        self.status = randint(0,1)
         self.number_of_neighbours = 0
 
     def change_status(self):
@@ -138,6 +138,7 @@ class Population:
                 else:
                     pygame.draw.rect(screen, self.settings.dead_color, cell_rect)
 
+        return next_generation
 class GameOfLife:
     """General class control game behaviour"""
     def __init__(self):
@@ -153,11 +154,12 @@ class GameOfLife:
 
     def main(self):
         population = Population()
-        population.pre_game()
+        # population.pre_game()
         while True:
             self.check_events()
             # population.pre_game()
-            population.draw_grid(self.screen)
+            next_gen = population.draw_grid(self.screen)
+            population.grid = next_gen
             pygame.display.flip()
 
 gol = GameOfLife()
