@@ -88,20 +88,27 @@ class Population:
         self.columns = int(self.width / self.cell_size)
         self.grid = [[Cell() for column in range(self.columns)] for row in range(self.rows)]
         self.snake_grid = [[Cell() for column in range(self.columns)] for row in range(self.rows)]
+        self.intro = True
         self.ready = False
 
     def create_snake_grid(self):
         snake_grid_list = []
-        with open('assets/banner.txt', 'r') as logo:
+        with open('assets/banner4.txt', 'r') as logo:
             for line in logo:
-                line = line.strip().split('')
+                line = list(line)
                 snake_grid_list.append(line)
 
-        for cell_obj, ascii_char in zip(self.snake_grid, snake_grid_list):
-            if ascii_char == ' ':
-                cell_obj.set_alive()
+        for cell_line, ascii_line in zip(self.snake_grid, snake_grid_list):
+            for cell_object, ascii_char in zip(cell_line, ascii_line):
+                if ascii_char != ' ':
+                    cell_object.set_alive()
 
-    def pre_populate_events(self):
+    def animate_snake_grid(self):
+        self.create_snake_grid()
+        while self.intro:
+
+
+    def pre_populate_events(self, grid):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -110,30 +117,30 @@ class Population:
                 x, y = pygame.mouse.get_pos()
                 pos_x, pos_y = int(x/self.cell_size), int(y/self.cell_size)
                 # If cell is alive then it's status will become dead
-                if self.grid[pos_y][pos_x].status == 1:
-                    self.grid[pos_y][pos_x].status = 0
+                if grid[pos_y][pos_x].status == 1:
+                    grid[pos_y][pos_x].status = 0
                 # If cell is dead then it's status will become alive
                 else:
-                    self.grid[pos_y][pos_x].status = 1
+                    grid[pos_y][pos_x].status = 1
             elif event.type == pygame.KEYDOWN:
                 # Press space to start the game
                 if event.key == pygame.K_SPACE:
                     self.ready = True
 
-    def pre_game(self):
+    def pre_game(self, grid, alive_color, dead_color):
         while not self.ready:
-            self.pre_populate_events()
-            for y in range(len(self.grid)):
-                for x in range(len(self.grid[0])):
+            self.pre_populate_events(grid)
+            for y in range(len(grid)):
+                for x in range(len(grid[0])):
                     cell_rect = pygame.Rect(x*self.cell_size, y*self.cell_size, self.cell_size, self.cell_size)
-                    if self.grid[y][x].status == 1:
-                        pygame.draw.rect(self.screen, gol.settings.alive_color, cell_rect)
+                    if grid[y][x].status == 1:
+                        pygame.draw.rect(self.screen, alive_color, cell_rect)
                     else:
-                        pygame.draw.rect(self.screen, gol.settings.dead_color, cell_rect)
+                        pygame.draw.rect(self.screen, dead_color, cell_rect)
             pygame.display.flip()
 
 
-    def draw_grid(self, screen):
+    def draw_grid(self, screen, grid):
         #(left,top,width,height)
         alive = 1
         dead = 0
@@ -230,15 +237,19 @@ class GameOfLife:
                 # This lets us pause the game and modify living and dead cells
                 if event.key == pygame.K_SPACE:
                     population.ready = False
-                    population.pre_game()
+                    population.pre_game(population.grid)
 
 
     def main(self):
         population = Population()
+        population.create_snake_grid()
         menu = MainMenu()
         text = Text()
         menu.choose_color()
-        population.pre_game()
+        population.pre_game(population.snake_grid, gol.settings.alive_intro_color, gol.settings.dead_intro_color)
+        population.pre_game(population.grid)
+
+        # After intro and menus are over.
         while True:
             pygame.time.delay(100)
             self.check_events(population)
