@@ -1,10 +1,18 @@
 import os, sys
 from itertools import cycle
 import copy
+import pickle
 from random import randint
 import pygame
 from pygame.locals import *
 from settings import Settings
+
+class Text:
+    def __init__(self):
+        self.font = pygame.font.Font('assets/FFFFORWA.TTF', 32)
+        self.text = self.font.render('Pygame of Life', True, (255,0,0))
+        self.rect = self.text.get_rect()
+        self.rect.center = (gol.settings.scr_width // 2, gol.settings.scr_height // 2)
 
 class MainMenu:
     """Takes care of color menu and user settings"""
@@ -12,6 +20,7 @@ class MainMenu:
         self.color_ready = False
         self.color_menu_img = pygame.image.load('assets/color_menu_2.png')
         self.color_menu_img_scaled = pygame.transform.scale(self.color_menu_img, (gol.settings.scr_height, gol.settings.scr_width))
+
     def check_color_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -51,7 +60,7 @@ class MainMenu:
 class Cell:
     """Class that stores state of each individual cell"""
     def __init__(self):
-        self.status = randint(0,1)
+        self.status = 0
         self.number_of_neighbours = 0
 
     def change_status(self):
@@ -61,6 +70,12 @@ class Cell:
         else:
             if self.number_of_neighbours == 3:
                 self.status = 1
+
+    def set_alive(self):
+        self.status = 1
+
+    def set_dead(self):
+        self.status = 0
 
 class Population:
     """Class that manages and draws the grid"""
@@ -72,7 +87,19 @@ class Population:
         self.rows = int(self.height / self.cell_size)
         self.columns = int(self.width / self.cell_size)
         self.grid = [[Cell() for column in range(self.columns)] for row in range(self.rows)]
+        self.snake_grid = [[Cell() for column in range(self.columns)] for row in range(self.rows)]
         self.ready = False
+
+    def create_snake_grid(self):
+        snake_grid_list = []
+        with open('assets/banner.txt', 'r') as logo:
+            for line in logo:
+                line = line.strip().split('')
+                snake_grid_list.append(line)
+
+        for cell_obj, ascii_char in zip(self.snake_grid, snake_grid_list):
+            if ascii_char == ' ':
+                cell_obj.set_alive()
 
     def pre_populate_events(self):
         for event in pygame.event.get():
@@ -104,6 +131,7 @@ class Population:
                     else:
                         pygame.draw.rect(self.screen, gol.settings.dead_color, cell_rect)
             pygame.display.flip()
+
 
     def draw_grid(self, screen):
         #(left,top,width,height)
@@ -185,6 +213,7 @@ class Population:
                     pygame.draw.rect(screen, gol.settings.dead_color, cell_rect)
 
         return next_generation
+
 class GameOfLife:
     """General class control game behaviour"""
     def __init__(self):
@@ -203,9 +232,11 @@ class GameOfLife:
                     population.ready = False
                     population.pre_game()
 
+
     def main(self):
         population = Population()
         menu = MainMenu()
+        text = Text()
         menu.choose_color()
         population.pre_game()
         while True:
@@ -213,6 +244,7 @@ class GameOfLife:
             self.check_events(population)
             next_gen = population.draw_grid(self.screen)
             population.grid = next_gen
+            self.screen.blit(text.text, text.rect)
             pygame.display.flip()
 
 gol = GameOfLife()
