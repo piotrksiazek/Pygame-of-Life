@@ -11,7 +11,7 @@ class MainMenu:
     def __init__(self):
         self.color_ready = False
         self.color_menu_img = pygame.image.load('assets/color_menu_2.png')
-
+        self.color_menu_img_scaled = pygame.transform.scale(self.color_menu_img, (gol.settings.scr_height, gol.settings.scr_width))
     def check_color_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -44,7 +44,7 @@ class MainMenu:
                 0.3*gol.settings.scr_width, 0.3*gol.settings.scr_width
             )
             pygame.draw.rect(gol.screen, gol.settings.dead_color, death_rect)
-            gol.screen.blit(self.color_menu_img, (0,0))
+            gol.screen.blit(self.color_menu_img_scaled, (0,0))
             pygame.display.flip()
 
 
