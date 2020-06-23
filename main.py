@@ -106,7 +106,7 @@ class Population:
     def animate_snake_grid(self):
         self.create_snake_grid()
         while self.intro:
-
+            pass
 
     def pre_populate_events(self, grid):
         for event in pygame.event.get():
@@ -140,76 +140,72 @@ class Population:
             pygame.display.flip()
 
 
-    def draw_grid(self, screen, grid):
+    def draw_grid(self, screen, alive_color, dead_color, grid):
         #(left,top,width,height)
         alive = 1
         dead = 0
-        
-        dead_color = gol.settings.dead_color
-        alive_color = gol.settings.alive_color
-        
-        next_generation = copy.deepcopy(self.grid)
+        next_generation = copy.deepcopy(grid)
         # Iterating over rows
-        for y in range(len(self.grid)):
+        for y in range(len(grid)):
             # Iterating over columns
-            for x in range(len(self.grid[0])):
+            for x in range(len(grid[0])):
 
                 cell = next_generation[y][x]
 
                 #upper left
                 if y == 0 and x == 0:
-                    cell.number_of_neighbours = self.grid[0][1].status + self.grid[1][0].status + self.grid[1][1].status
+                    cell.number_of_neighbours = grid[0][1].status + grid[1][0].status + grid[1][1].status
                     cell.change_status()
 
                 #upper right
-                elif y == 0 and x == len(self.grid[0]) - 1:
-                    cell.number_of_neighbours = self.grid[0][-2].status + self.grid[1][-1].status + self.grid[1][-2].status
+                elif y == 0 and x == len(grid[0]) - 1:
+                    cell.number_of_neighbours = grid[0][-2].status + grid[1][-1].status + grid[1][-2].status
                     cell.change_status()
 
                 #bottom left
-                elif y == len(self.grid) - 1 and x == 0:
-                    cell.number_of_neighbours = self.grid[-1][1].status + self.grid[-2][0].status + self.grid[-2][1].status
+                elif y == len(grid) - 1 and x == 0:
+                    cell.number_of_neighbours = grid[-1][1].status + grid[-2][0].status + grid[-2][1].status
                     cell.change_status()
 
                 #bottom right
-                elif y == len(self.grid) - 1 and x == len(self.grid[0]) - 1:
-                    cell.number_of_neighbours = self.grid[-1][-2].status + self.grid[-2][-1].status + self.grid[-2][-2].status
+                elif y == len(grid) - 1 and x == len(grid[0]) - 1:
+                    cell.number_of_neighbours = grid[-1][-2].status + grid[-2][-1].status + grid[-2][-2].status
                     cell.change_status()
 
                 #left
-                elif 0 < y < len(self.grid) - 1 and x == 0:
+                elif 0 < y < len(grid) - 1 and x == 0:
                     cell.number_of_neighbours = (
-                        self.grid[y-1][x].status + self.grid[y-1][x+1].status + self.grid[y][x+1].status +
-                        self.grid[y+1][x].status + self.grid[y+1][x+1].status
+                        grid[y-1][x].status + grid[y-1][x+1].status + grid[y][x+1].status +
+                        grid[y+1][x].status + grid[y+1][x+1].status
                     )
                     cell.change_status()
                 #right
-                elif 0 < y < len(self.grid) - 1 and x == len(self.grid) - 1:
+                elif 0 < y < len(grid) - 1 and x == len(grid) - 1:
                     cell.number_of_neighbours = (
-                        self.grid[y-1][x].status + self.grid[y-1][x-1].status + self.grid[y][x-1].status +
-                        self.grid[y+1][x-1].status + self.grid[y+1][x].status
+                        grid[y-1][x].status + grid[y-1][x-1].status + grid[y][x-1].status +
+                        grid[y+1][x-1].status + grid[y+1][x].status
                     )
                     cell.change_status()
                 #upper
-                elif y == 0 and 0 < x < len(self.grid) - 1:
+                elif y == 0 and 0 < x < len(grid) - 1:
                     cell.number_of_neighbours = (
-                        self.grid[y][x-1].status + self.grid[y][x+1].status + self.grid[y+1][x-1].status +
-                        self.grid[y+1][x].status + self.grid[y+1][x+1].status
+                        grid[y][x-1].status + grid[y][x+1].status + grid[y+1][x-1].status +
+                        grid[y+1][x].status + grid[y+1][x+1].status
                     )
                     cell.change_status()
                 #bottom
-                elif y == len(self.grid) - 1 and 0 < x < len(self.grid) - 1:
+                elif y == len(grid) - 1 and 0 < x < len(grid) - 1:
                     cell.number_of_neighbours = (
-                            self.grid[y][x-1].status + self.grid[y][x+1].status + self.grid[y-1][x-1].status +
-                            self.grid[y-1][x].status + self.grid[y-1][x+1].status
+                            grid[y][x-1].status + grid[y][x+1].status + grid[y-1][x-1].status +
+                            grid[y-1][x].status + grid[y-1][x+1].status
                     )
                     cell.change_status()
                 #inner
-                elif 0 < y < len(self.grid) - 1 and 0 < x < len(self.grid[0]) - 1:
+                elif 0 < y < len(grid) - 1 and 0 < x < len(grid[0]) - 1:
                     cell.number_of_neighbours = (
-                            self.grid[y][x-1].status + self.grid[y][x+1].status + self.grid[y-1][x-1].status +
-                            self.grid[y-1][x].status + self.grid[y-1][x+1].status + self.grid[y+1][x-1].status +
-                            self.grid[y+1][x].status + self.grid[y+1][x+1].status
+                            grid[y][x-1].status + grid[y][x+1].status + grid[y-1][x-1].status +
+                            grid[y-1][x].status + grid[y-1][x+1].status + grid[y+1][x-1].status +
+                            grid[y+1][x].status + grid[y+1][x+1].status
                     )
                     cell.change_status()
 
@@ -237,7 +233,7 @@ class GameOfLife:
                 # This lets us pause the game and modify living and dead cells
                 if event.key == pygame.K_SPACE:
                     population.ready = False
-                    population.pre_game(population.grid)
+                    population.pre_game(population.grid, gol.settings.alive_color, gol.settings.dead_color)
 
 
     def main(self):
@@ -247,13 +243,13 @@ class GameOfLife:
         text = Text()
         menu.choose_color()
         population.pre_game(population.snake_grid, gol.settings.alive_intro_color, gol.settings.dead_intro_color)
-        population.pre_game(population.grid)
+        population.pre_game(population.grid, gol.settings.alive_color, gol.settings.dead_color)
 
         # After intro and menus are over.
         while True:
             pygame.time.delay(100)
             self.check_events(population)
-            next_gen = population.draw_grid(self.screen)
+            next_gen = population.draw_grid(self.screen, gol.settings.alive_color, gol.settings.dead_color, population.grid)
             population.grid = next_gen
             self.screen.blit(text.text, text.rect)
             pygame.display.flip()
