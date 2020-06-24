@@ -103,10 +103,22 @@ class Population:
                 if ascii_char != ' ':
                     cell_object.set_alive()
 
-    def animate_snake_grid(self):
+    def animate_snake_grid(self, population):
         self.create_snake_grid()
+        speed = 400
+        i = 0
         while self.intro:
-            pass
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+            alive_cell_color = gol.settings.colors_of_life_intro[i]
+            pygame.time.delay(i)
+            next_gen = population.draw_grid(self.screen, alive_cell_color, gol.settings.dead_intro_color, population.snake_grid)
+            population.snake_grid = next_gen
+            pygame.display.flip()
+            i += 1
+            if speed > 20:
+                speed -= 20
 
     def pre_populate_events(self, grid):
         for event in pygame.event.get():
@@ -211,9 +223,9 @@ class Population:
 
                 cell_rect = pygame.Rect(x*self.cell_size, y*self.cell_size, self.cell_size, self.cell_size)
                 if cell.status == 1:
-                    pygame.draw.rect(screen, gol.settings.alive_color, cell_rect)
+                    pygame.draw.rect(screen, alive_color, cell_rect)
                 else:
-                    pygame.draw.rect(screen, gol.settings.dead_color, cell_rect)
+                    pygame.draw.rect(screen, dead_color, cell_rect)
 
         return next_generation
 
@@ -241,10 +253,10 @@ class GameOfLife:
         population.create_snake_grid()
         menu = MainMenu()
         text = Text()
+        population.animate_snake_grid(population)
         menu.choose_color()
         population.pre_game(population.snake_grid, gol.settings.alive_intro_color, gol.settings.dead_intro_color)
         population.pre_game(population.grid, gol.settings.alive_color, gol.settings.dead_color)
-
         # After intro and menus are over.
         while True:
             pygame.time.delay(100)
