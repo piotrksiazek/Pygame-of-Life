@@ -1,233 +1,8 @@
 import os, sys
-from itertools import cycle
-import copy
-import pickle
-from random import randint
 import pygame
-from pygame.locals import *
 from settings import Settings
-
-class Text:
-    def __init__(self):
-        self.font = pygame.font.Font('assets/FFFFORWA.TTF', 32)
-        self.text = self.font.render('Pygame of Life', True, (255,0,0))
-        self.rect = self.text.get_rect()
-        self.rect.center = (gol.settings.scr_width // 2, gol.settings.scr_height // 2)
-
-class MainMenu:
-    """Takes care of color menu and user settings"""
-    def __init__(self):
-        self.color_ready = False
-        self.color_menu_img = pygame.image.load('assets/color_menu_2.png')
-        self.color_menu_img_scaled = pygame.transform.scale(self.color_menu_img, (gol.settings.scr_height, gol.settings.scr_width))
-
-    def check_color_events(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-            elif event.type == pygame.KEYDOWN:
-                # We don't want to exceed max index of color array. gol.settings.max_color_of_life is the last index.
-                if event.key == pygame.K_RIGHT and gol.settings.colors_of_life.index(gol.settings.alive_color) < gol.settings.max_color_of_life:
-                    gol.settings.alive_color = gol.settings.colors_of_life[gol.settings.colors_of_life.index(gol.settings.alive_color)+1]
-                elif event.key == pygame.K_LEFT and gol.settings.colors_of_life.index(gol.settings.alive_color) > 0:
-                    gol.settings.alive_color = gol.settings.colors_of_life[gol.settings.colors_of_life.index(gol.settings.alive_color)-1]
-
-                # The same thing but for colors of death.
-                elif event.key == pygame.K_UP and gol.settings.colors_of_death.index(gol.settings.dead_color) < gol.settings.max_color_of_death:
-                    gol.settings.dead_color = gol.settings.colors_of_death[gol.settings.colors_of_death.index(gol.settings.dead_color)+1]
-                elif event.key == pygame.K_DOWN and gol.settings.colors_of_death.index(gol.settings.dead_color) > 0:
-                    gol.settings.dead_color = gol.settings.colors_of_death[gol.settings.colors_of_death.index(gol.settings.dead_color)-1]
-
-                # Pressing space breakes the choose_color loop.
-                elif event.key == pygame.K_SPACE:
-                    self.color_ready = True
-
-    def choose_color(self):
-        while not self.color_ready:
-            self.check_color_events()
-            gol.screen.fill(gol.settings.alive_color)
-
-            # death_rect is drawn right behind transparent japaneese death symbol so we see only colorful sign.
-            death_rect = pygame.Rect(
-                gol.settings.scr_width - 0.20*gol.settings.scr_width, gol.settings.scr_height * 0.3,
-                0.3*gol.settings.scr_width, 0.3*gol.settings.scr_width
-            )
-            pygame.draw.rect(gol.screen, gol.settings.dead_color, death_rect)
-            gol.screen.blit(self.color_menu_img_scaled, (0,0))
-            pygame.display.flip()
-
-
-class Cell:
-    """Class that stores state of each individual cell"""
-    def __init__(self):
-        self.status = 0
-        self.number_of_neighbours = 0
-
-    def change_status(self):
-        if self.status == 1:
-            if self.number_of_neighbours < 2 or self.number_of_neighbours > 3:
-                self.status = 0
-        else:
-            if self.number_of_neighbours == 3:
-                self.status = 1
-
-    def set_alive(self):
-        self.status = 1
-
-    def set_dead(self):
-        self.status = 0
-
-class Population:
-    """Class that manages and draws the grid"""
-    def __init__(self):
-        self.screen = pygame.display.set_mode((gol.settings.scr_width, gol.settings.scr_height))
-        self.cell_size = gol.settings.cell_size
-        self.width = gol.settings.scr_width
-        self.height = gol.settings.scr_height
-        self.rows = int(self.height / self.cell_size)
-        self.columns = int(self.width / self.cell_size)
-        self.grid = [[Cell() for column in range(self.columns)] for row in range(self.rows)]
-        self.snake_grid = [[Cell() for column in range(self.columns)] for row in range(self.rows)]
-        self.intro = True
-        self.ready = False
-
-    def create_snake_grid(self):
-        snake_grid_list = []
-        with open('assets/banner4.txt', 'r') as logo:
-            for line in logo:
-                line = list(line)
-                snake_grid_list.append(line)
-
-        for cell_line, ascii_line in zip(self.snake_grid, snake_grid_list):
-            for cell_object, ascii_char in zip(cell_line, ascii_line):
-                if ascii_char != ' ':
-                    cell_object.set_alive()
-
-    def animate_snake_grid(self, population):
-        self.create_snake_grid()
-        speed = 400
-        i = 0
-        while self.intro:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
-            alive_cell_color = gol.settings.colors_of_life_intro[i]
-            pygame.time.delay(i)
-            next_gen = population.draw_grid(self.screen, alive_cell_color, gol.settings.dead_intro_color, population.snake_grid)
-            population.snake_grid = next_gen
-            pygame.display.flip()
-            i += 1
-            if speed > 20:
-                speed -= 20
-
-    def pre_populate_events(self, grid):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                # Getting x and y coordinate of coursor and translating it into individual cell position
-                x, y = pygame.mouse.get_pos()
-                pos_x, pos_y = int(x/self.cell_size), int(y/self.cell_size)
-                # If cell is alive then it's status will become dead
-                if grid[pos_y][pos_x].status == 1:
-                    grid[pos_y][pos_x].status = 0
-                # If cell is dead then it's status will become alive
-                else:
-                    grid[pos_y][pos_x].status = 1
-            elif event.type == pygame.KEYDOWN:
-                # Press space to start the game
-                if event.key == pygame.K_SPACE:
-                    self.ready = True
-
-    def pre_game(self, grid, alive_color, dead_color):
-        while not self.ready:
-            self.pre_populate_events(grid)
-            for y in range(len(grid)):
-                for x in range(len(grid[0])):
-                    cell_rect = pygame.Rect(x*self.cell_size, y*self.cell_size, self.cell_size, self.cell_size)
-                    if grid[y][x].status == 1:
-                        pygame.draw.rect(self.screen, alive_color, cell_rect)
-                    else:
-                        pygame.draw.rect(self.screen, dead_color, cell_rect)
-            pygame.display.flip()
-
-
-    def draw_grid(self, screen, alive_color, dead_color, grid):
-        #(left,top,width,height)
-        alive = 1
-        dead = 0
-        next_generation = copy.deepcopy(grid)
-        # Iterating over rows
-        for y in range(len(grid)):
-            # Iterating over columns
-            for x in range(len(grid[0])):
-
-                cell = next_generation[y][x]
-
-                #upper left
-                if y == 0 and x == 0:
-                    cell.number_of_neighbours = grid[0][1].status + grid[1][0].status + grid[1][1].status
-                    cell.change_status()
-
-                #upper right
-                elif y == 0 and x == len(grid[0]) - 1:
-                    cell.number_of_neighbours = grid[0][-2].status + grid[1][-1].status + grid[1][-2].status
-                    cell.change_status()
-
-                #bottom left
-                elif y == len(grid) - 1 and x == 0:
-                    cell.number_of_neighbours = grid[-1][1].status + grid[-2][0].status + grid[-2][1].status
-                    cell.change_status()
-
-                #bottom right
-                elif y == len(grid) - 1 and x == len(grid[0]) - 1:
-                    cell.number_of_neighbours = grid[-1][-2].status + grid[-2][-1].status + grid[-2][-2].status
-                    cell.change_status()
-
-                #left
-                elif 0 < y < len(grid) - 1 and x == 0:
-                    cell.number_of_neighbours = (
-                        grid[y-1][x].status + grid[y-1][x+1].status + grid[y][x+1].status +
-                        grid[y+1][x].status + grid[y+1][x+1].status
-                    )
-                    cell.change_status()
-                #right
-                elif 0 < y < len(grid) - 1 and x == len(grid) - 1:
-                    cell.number_of_neighbours = (
-                        grid[y-1][x].status + grid[y-1][x-1].status + grid[y][x-1].status +
-                        grid[y+1][x-1].status + grid[y+1][x].status
-                    )
-                    cell.change_status()
-                #upper
-                elif y == 0 and 0 < x < len(grid) - 1:
-                    cell.number_of_neighbours = (
-                        grid[y][x-1].status + grid[y][x+1].status + grid[y+1][x-1].status +
-                        grid[y+1][x].status + grid[y+1][x+1].status
-                    )
-                    cell.change_status()
-                #bottom
-                elif y == len(grid) - 1 and 0 < x < len(grid) - 1:
-                    cell.number_of_neighbours = (
-                            grid[y][x-1].status + grid[y][x+1].status + grid[y-1][x-1].status +
-                            grid[y-1][x].status + grid[y-1][x+1].status
-                    )
-                    cell.change_status()
-                #inner
-                elif 0 < y < len(grid) - 1 and 0 < x < len(grid[0]) - 1:
-                    cell.number_of_neighbours = (
-                            grid[y][x-1].status + grid[y][x+1].status + grid[y-1][x-1].status +
-                            grid[y-1][x].status + grid[y-1][x+1].status + grid[y+1][x-1].status +
-                            grid[y+1][x].status + grid[y+1][x+1].status
-                    )
-                    cell.change_status()
-
-                cell_rect = pygame.Rect(x*self.cell_size, y*self.cell_size, self.cell_size, self.cell_size)
-                if cell.status == 1:
-                    pygame.draw.rect(screen, alive_color, cell_rect)
-                else:
-                    pygame.draw.rect(screen, dead_color, cell_rect)
-
-        return next_generation
+import population_and_intro
+import text_and_menu
 
 class GameOfLife:
     """General class control game behaviour"""
@@ -249,21 +24,23 @@ class GameOfLife:
 
 
     def main(self):
-        population = Population()
+
+        population = population_and_intro.Population(gol)
         population.create_snake_grid()
-        menu = MainMenu()
-        text = Text()
-        population.animate_snake_grid(population)
-        menu.choose_color()
-        population.pre_game(population.snake_grid, gol.settings.alive_intro_color, gol.settings.dead_intro_color)
-        population.pre_game(population.grid, gol.settings.alive_color, gol.settings.dead_color)
+        menu = text_and_menu.MainMenu(gol)
+
+        population.animate_snake_grid(population, gol)
+
+        menu.choose_color(gol)
+        # population.pre_game(population.snake_grid, gol.settings.alive_intro_color, gol.settings.dead_intro_color)
+        # population.pre_game(population.grid, gol.settings.alive_color, gol.settings.dead_color)
         # After intro and menus are over.
         while True:
             pygame.time.delay(100)
             self.check_events(population)
             next_gen = population.draw_grid(self.screen, gol.settings.alive_color, gol.settings.dead_color, population.grid)
             population.grid = next_gen
-            self.screen.blit(text.text, text.rect)
+            # self.screen.blit(text.text, text.rect)
             pygame.display.flip()
 
 gol = GameOfLife()
