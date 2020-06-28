@@ -32,17 +32,19 @@ class Population:
         self.width = gol.settings.scr_width
         self.height = gol.settings.scr_height
         self.rows = int(self.height / self.cell_size)
-        self.columns = int(self.width / self.cell_size)
+        self.columns = int(self.height / self.cell_size)
         self.grid = np.array([[Cell() for column in range(self.columns)] for row in range(self.rows)])
         self.game_speed = 100
         self.ready = False
 
         # Attributes used by intro.
-        self.snake_grid = np.array([[Cell() for column in range(self.columns)] for row in range(self.rows)])
+        self.intro_rows = int(self.height / gol.settings.intro_cell_size)
+        self.intro_columns = int(self.width / gol.settings.intro_cell_size)
+        self.snake_grid = np.array([[Cell() for column in range(self.intro_columns)] for row in range(self.intro_rows)])
         self.intro = True
         self.intro_speed = 420
 
-        # Used only to display "Pygame of life" at the beginnging.
+        # Used only to display "Pygame of life" and "Click to continue" at the beginnging.
         self.text_intro_color = (255, 0, 0)
         self.text_fade_speed = 400
 
@@ -60,12 +62,12 @@ class Population:
         snake_grid_list = []
         with open('assets/banner4.txt', 'r') as logo:
             for line in logo:
-                line = list(line)
+                line = list(line.strip())
                 snake_grid_list.append(line)
 
         for cell_line, ascii_line in zip(self.snake_grid, snake_grid_list):
             for cell_object, ascii_char in zip(cell_line, ascii_line):
-                if ascii_char != ' ':
+                if ascii_char == ' ':
                     cell_object.set_alive()
 
     def exit_or_continue_intro(self):
@@ -91,7 +93,7 @@ class Population:
             self.exit_or_continue_intro()
             alive_cell_color = gol.settings.colors_of_life_intro[i]
             pygame.time.delay(i)
-            next_gen = population.draw_grid(self.screen, alive_cell_color, gol.settings.dead_intro_color, population.snake_grid)
+            next_gen = population.draw_grid(self.screen, alive_cell_color, gol.settings.dead_intro_color, population.snake_grid, gol.settings.intro_cell_size, 1.5)
             population.snake_grid = next_gen
             pygame.display.flip()
             i += 1
@@ -110,7 +112,7 @@ class Population:
                     pygame.display.flip()
 
 
-    def pre_populate_events(self, grid):
+    def pre_populate_events(self, grid, gol):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -118,20 +120,22 @@ class Population:
                 # Getting x and y coordinate of coursor and translating it into individual cell position
                 x, y = pygame.mouse.get_pos()
                 pos_x, pos_y = int(x/self.cell_size), int(y/self.cell_size)
-                # If cell is alive then it's status will become dead
-                if grid[pos_y][pos_x].status == 1:
-                    grid[pos_y][pos_x].status = 0
-                # If cell is dead then it's status will become alive
-                else:
-                    grid[pos_y][pos_x].status = 1
+                # Cell status can be changed only in a square plane.
+                if x < gol.settings.scr_height:
+                    # If cell is alive then it's status will become dead
+                    if grid[pos_y][pos_x].status == 1:
+                        grid[pos_y][pos_x].status = 0
+                    # If cell is dead then it's status will become alive
+                    else:
+                        grid[pos_y][pos_x].status = 1
             elif event.type == pygame.KEYDOWN:
                 # Press space to start the game
                 if event.key == pygame.K_SPACE:
                     self.ready = True
 
-    def pre_game(self, grid, alive_color, dead_color):
+    def pre_game(self, grid, alive_color, dead_color, gol):
         while not self.ready:
-            self.pre_populate_events(grid)
+            self.pre_populate_events(grid, gol)
             for y in range(len(grid)):
                 for x in range(len(grid[0])):
                     cell_rect = pygame.Rect(x*self.cell_size, y*self.cell_size, self.cell_size, self.cell_size)
@@ -142,10 +146,7 @@ class Population:
             pygame.display.flip()
 
 
-    def draw_grid(self, screen, alive_color, dead_color, grid):
-        #(left,top,width,height)
-        alive = 1
-        dead = 0
+    def draw_grid(self, screen, alive_color, dead_color, grid, cell_size, align):
         next_generation = copy.deepcopy(grid)
         # Iterating over rows
         for y in range(len(grid)):
@@ -211,7 +212,7 @@ class Population:
                     )
                     cell.change_status()
 
-                cell_rect = pygame.Rect(x*self.cell_size, y*self.cell_size, self.cell_size, self.cell_size)
+                cell_rect = pygame.Rect(align*x*cell_size, y*cell_size, cell_size, cell_size)
                 if cell.status == 1:
                     pygame.draw.rect(screen, alive_color, cell_rect)
                 else:

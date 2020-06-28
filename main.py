@@ -20,7 +20,7 @@ class GameOfLife:
                 # This lets us pause the game and modify living and dead cells
                 if event.key == pygame.K_SPACE:
                     population.ready = False
-                    population.pre_game(population.grid, gol.settings.alive_color, gol.settings.dead_color)
+                    population.pre_game(population.grid, gol.settings.alive_color, gol.settings.dead_color, gol)
 
 
     def main(self):
@@ -31,16 +31,16 @@ class GameOfLife:
 
         population.animate_snake_grid(population, gol)
 
-        menu.choose_color(gol)
+        # menu.choose_color(gol)
+
         # population.pre_game(population.snake_grid, gol.settings.alive_intro_color, gol.settings.dead_intro_color)
         # population.pre_game(population.grid, gol.settings.alive_color, gol.settings.dead_color)
         # After intro and menus are over.
         while True:
             pygame.time.delay(100)
             self.check_events(population)
-            next_gen = population.draw_grid(self.screen, gol.settings.alive_color, gol.settings.dead_color, population.grid)
+            next_gen = population.draw_grid(self.screen, gol.settings.alive_color, gol.settings.dead_color, population.grid, gol.settings.cell_size, 1)
             population.grid = next_gen
-            # self.screen.blit(text.text, text.rect)
             pygame.display.flip()
 
 gol = GameOfLife()

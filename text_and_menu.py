@@ -9,9 +9,9 @@ import sys
 #         self.rect.center = (gol.settings.scr_width // 2, gol.settings.scr_height // 2)
 
 class Button:
-    def __init__(self, top, bottom, width, height, text, color, color_clicked):
+    def __init__(self, left, top, width, height, text, color, color_clicked):
+        self.left = left
         self.top = top
-        self.bottom = bottom
         self.width = width
         self.height = height
         self.text = text
@@ -20,6 +20,10 @@ class Button:
 
     def draw_button(self):
         pass
+
+class Interface:
+    def __init__(self):
+        self.generation_counter = 0
 
 class MainMenu:
     """Takes care of color menu and user settings"""

@@ -16,7 +16,7 @@ class Settings:
         self.alive_intro_color = self.colors_of_life[0]
         self.dead_intro_color = (0,0,0)
 
-        self.scr_width = 700
+        self.scr_width = 1000
         self.scr_height = 700
-        self.cell_size = 10
+        self.cell_size = 20
         self.intro_cell_size = 5
