@@ -36,6 +36,7 @@ class Population:
         self.grid = np.array([[Cell() for column in range(self.columns)] for row in range(self.rows)])
         self.game_speed = 100
         self.ready = False
+        self.number_of_generations = 0
 
         # Attributes used by intro.
         self.intro_rows = int(self.height / gol.settings.intro_cell_size)
@@ -97,7 +98,7 @@ class Population:
             population.snake_grid = next_gen
             pygame.display.flip()
             i += 1
-            # Animation speeds up every loop untill it reaches minimal speed.
+            # Animation speeds up every loop until it reaches minimal speed.
             if self.intro_speed >= 20:
                 self.intro_speed -= 100
 
@@ -131,19 +132,20 @@ class Population:
             elif event.type == pygame.KEYDOWN:
                 # Press space to start the game
                 if event.key == pygame.K_SPACE:
-                    self.ready = True
+                    gol.paused = False
 
-    def pre_game(self, grid, alive_color, dead_color, gol):
-        while not self.ready:
-            self.pre_populate_events(grid, gol)
-            for y in range(len(grid)):
-                for x in range(len(grid[0])):
-                    cell_rect = pygame.Rect(x*self.cell_size, y*self.cell_size, self.cell_size, self.cell_size)
-                    if grid[y][x].status == 1:
-                        pygame.draw.rect(self.screen, alive_color, cell_rect)
-                    else:
-                        pygame.draw.rect(self.screen, dead_color, cell_rect)
-            pygame.display.flip()
+    def pre_game(self, grid, alive_color, dead_color, gol, interface, population):
+        self.pre_populate_events(grid, gol)
+        for y in range(len(grid)):
+            # We don't iterate over particular sublist but just want to get the length of x axis.
+            for x in range(len(grid[0])):
+                cell_rect = pygame.Rect(x*self.cell_size, y*self.cell_size, self.cell_size, self.cell_size)
+                if grid[y][x].status == 1:
+                    pygame.draw.rect(self.screen, alive_color, cell_rect)
+                else:
+                    pygame.draw.rect(self.screen, dead_color, cell_rect)
+        interface.draw_and_update_counter(population, gol)
+        pygame.display.flip()
 
 
     def draw_grid(self, screen, alive_color, dead_color, grid, cell_size, align):
@@ -217,5 +219,7 @@ class Population:
                     pygame.draw.rect(screen, alive_color, cell_rect)
                 else:
                     pygame.draw.rect(screen, dead_color, cell_rect)
+        if not self.intro:
+            self.number_of_generations += 1
 
         return next_generation
