@@ -219,7 +219,6 @@ class Population:
                     pygame.draw.rect(screen, alive_color, cell_rect)
                 else:
                     pygame.draw.rect(screen, dead_color, cell_rect)
-        if not self.intro:
-            self.number_of_generations += 1
+        self.number_of_generations += 1
 
         return next_generation

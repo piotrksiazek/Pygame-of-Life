@@ -12,6 +12,9 @@ class GameOfLife:
         self.settings = Settings()
         self.screen = pygame.display.set_mode((self.settings.scr_width, self.settings.scr_height))
         self.paused = True
+        self.mode_list = ['mode', 'death', 'life', 'classic']
+        self.mode = self.mode_list[0]
+
 
     def check_events(self, population):
         for event in pygame.event.get():
@@ -21,18 +24,21 @@ class GameOfLife:
                 # This lets us pause the game and modify living and dead cells
                 if event.key == pygame.K_SPACE:
                     self.paused = True
-
-
+    
+    # def make_love_not_war(self, gol, population):
+    #     next_gen = population.draw_grid(self.screen, gol.settings.alive_color, gol.settings.dead_color, population.grid, gol.settings.cell_size, 1)
+    #     population.grid = next_gen
 
     def main(self):
 
-        population = population_and_intro.Population(gol)
-        population.create_snake_grid()
+        intro = population_and_intro.Population(gol)
+        intro.create_snake_grid()
         menu = text_and_menu.MainMenu(gol)
-        interface = text_and_menu.Interface(gol, population)
 
-        population.animate_snake_grid(population, gol)
+        intro.animate_snake_grid(intro, gol)
         menu.draw_menu(gol)
+        population = population_and_intro.Population(gol)
+        interface = text_and_menu.Interface(gol, population)
         # menu.choose_color(gol)
 
         # population.pre_game(population.snake_grid, gol.settings.alive_intro_color, gol.settings.dead_intro_color)
