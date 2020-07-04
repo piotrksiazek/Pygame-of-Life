@@ -37,6 +37,7 @@ class Population:
         self.game_speed = 100
         self.ready = False
         self.number_of_generations = 0
+        self.number_of_living_cells = 0
 
         # Attributes used by intro.
         self.intro_rows = int(self.height / gol.settings.intro_cell_size)
@@ -58,6 +59,10 @@ class Population:
         self.continue_text = self.continue_font.render('PRESS ANYTHING TO CONTINUE', True, self.text_intro_color)
         self.continue_rect = self.title_text.get_rect()
         self.continue_rect.center = (0.57*gol.settings.scr_width, gol.settings.scr_height)
+
+    def count_living_cells(self):
+        self.number_of_living_cells = sum(sum(1 for grid_cell in row if grid_cell.status == 1) for row in self.grid)
+        return self.number_of_living_cells
 
     def create_snake_grid(self):
         snake_grid_list = []
@@ -144,8 +149,8 @@ class Population:
                     pygame.draw.rect(self.screen, alive_color, cell_rect)
                 else:
                     pygame.draw.rect(self.screen, dead_color, cell_rect)
-        interface.draw_and_update_counter(population, gol)
-        pygame.display.flip()
+        interface.draw_and_update_counter(population, gol, interface.interface_rect.centerx, 20, self.number_of_generations)
+        interface.draw_and_update_pop_counter(population, gol, interface.interface_rect.centerx, 60, self.number_of_living_cells)
 
 
     def draw_grid(self, screen, alive_color, dead_color, grid, cell_size, align):
@@ -160,22 +165,18 @@ class Population:
                 #upper left
                 if y == 0 and x == 0:
                     cell.number_of_neighbours = grid[0][1].status + grid[1][0].status + grid[1][1].status
-                    cell.change_status()
 
                 #upper right
                 elif y == 0 and x == len(grid[0]) - 1:
                     cell.number_of_neighbours = grid[0][-2].status + grid[1][-1].status + grid[1][-2].status
-                    cell.change_status()
 
                 #bottom left
                 elif y == len(grid) - 1 and x == 0:
                     cell.number_of_neighbours = grid[-1][1].status + grid[-2][0].status + grid[-2][1].status
-                    cell.change_status()
 
                 #bottom right
                 elif y == len(grid) - 1 and x == len(grid[0]) - 1:
                     cell.number_of_neighbours = grid[-1][-2].status + grid[-2][-1].status + grid[-2][-2].status
-                    cell.change_status()
 
                 #left
                 elif 0 < y < len(grid) - 1 and x == 0:
@@ -183,28 +184,24 @@ class Population:
                         grid[y-1][x].status + grid[y-1][x+1].status + grid[y][x+1].status +
                         grid[y+1][x].status + grid[y+1][x+1].status
                     )
-                    cell.change_status()
                 #right
                 elif 0 < y < len(grid) - 1 and x == len(grid) - 1:
                     cell.number_of_neighbours = (
                         grid[y-1][x].status + grid[y-1][x-1].status + grid[y][x-1].status +
                         grid[y+1][x-1].status + grid[y+1][x].status
                     )
-                    cell.change_status()
                 #upper
                 elif y == 0 and 0 < x < len(grid) - 1:
                     cell.number_of_neighbours = (
                         grid[y][x-1].status + grid[y][x+1].status + grid[y+1][x-1].status +
                         grid[y+1][x].status + grid[y+1][x+1].status
                     )
-                    cell.change_status()
                 #bottom
                 elif y == len(grid) - 1 and 0 < x < len(grid) - 1:
                     cell.number_of_neighbours = (
                             grid[y][x-1].status + grid[y][x+1].status + grid[y-1][x-1].status +
                             grid[y-1][x].status + grid[y-1][x+1].status
                     )
-                    cell.change_status()
                 #inner
                 elif 0 < y < len(grid) - 1 and 0 < x < len(grid[0]) - 1:
                     cell.number_of_neighbours = (
@@ -212,7 +209,7 @@ class Population:
                             grid[y-1][x].status + grid[y-1][x+1].status + grid[y+1][x-1].status +
                             grid[y+1][x].status + grid[y+1][x+1].status
                     )
-                    cell.change_status()
+                cell.change_status()
 
                 cell_rect = pygame.Rect(align*x*cell_size, y*cell_size, cell_size, cell_size)
                 if cell.status == 1:
@@ -220,5 +217,8 @@ class Population:
                 else:
                     pygame.draw.rect(screen, dead_color, cell_rect)
         self.number_of_generations += 1
+
+        # Counting every living cell on the grid.
+        self.number_of_living_cells = sum(sum(1 for grid_cell in row if grid_cell.status == 1) for row in self.grid)
 
         return next_generation

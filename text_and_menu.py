@@ -10,6 +10,12 @@ class Interface:
         self.counter_text = self.counter_font.render('0', True, self.counter_color)
         self.counter_rect = self.counter_text.get_rect()
 
+        # Population counter attributes
+        self.pop_counter_color = (255, 0, 0)
+        self.pop_counter_font = pygame.font.Font('assets/FFFFORWA.TTF', 32)
+        self.pop_counter_text = self.pop_counter_font.render('0', True, self.pop_counter_color)
+        self.pop_counter_rect = self.pop_counter_text.get_rect()
+
         # Interface board attributes
         self.interface_bg_color = (50, 0, 0)
         self.interface_rect = pygame.Rect(gol.settings.scr_height, 0, gol.settings.scr_width-gol.settings.scr_height, gol.settings.scr_height)
@@ -18,11 +24,23 @@ class Interface:
     def draw_bg(self, gol):
         pygame.draw.rect(gol.screen, self.interface_bg_color, self.interface_rect)
 
-    def draw_and_update_counter(self, population, gol):
-        self.counter_rect.center = (150, 150)
+    def draw_and_update_counter(self, population, gol, centerx, y, things_to_count):
+        # self.counter_rect.centerx = self.interface_rect.centerx
+        # self.counter_rect.y = 20
+        self.counter_rect.centerx = centerx
+        self.counter_rect.y = y
         gol.screen.blit(self.counter_text, self.counter_rect)
-        self.counter_text = self.counter_font.render(f'{population.number_of_generations}', True, self.counter_color)
+        self.counter_text = self.counter_font.render(f'{things_to_count}', True, self.counter_color)
         self.counter_rect = self.counter_text.get_rect()
+
+    def draw_and_update_pop_counter(self, population, gol, centerx, y, things_to_count):
+        self.pop_counter_rect.centerx = centerx
+        self.pop_counter_rect.y = y
+        gol.screen.blit(self.pop_counter_text, self.pop_counter_rect)
+        self.pop_counter_text = self.pop_counter_font.render(f'{things_to_count}', True, self.counter_color)
+        self.pop_counter_rect = self.pop_counter_text.get_rect()
+
+
 
 class Button:
     def __init__(self, left, top, width, height, text, color, text_color, color_clicked, gol):
@@ -122,7 +140,6 @@ class MainMenu:
                     self.size_button.text = str(gol.settings.menu_cell_size_list[gol.settings.menu_cell_size_list.index(self.size_button.text)-1])
                     if self.size_button.text != 'size':
                         gol.settings.cell_size = int(self.size_button.text)
-                print(gol.settings.cell_size)
 
     def draw_menu(self, gol):
         while self.in_menu:

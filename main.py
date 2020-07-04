@@ -49,10 +49,15 @@ class GameOfLife:
             interface.draw_bg(gol)
             while self.paused:
                 population.pre_game(population.grid, gol.settings.alive_color, gol.settings.dead_color, gol, interface, population)
+                interface.draw_bg(gol)
+                interface.draw_and_update_counter(population, gol, interface.interface_rect.centerx, 20, population.number_of_generations)
+                interface.draw_and_update_pop_counter(population, gol, interface.interface_rect.centerx, 60, population.count_living_cells())
+                pygame.display.flip()
             self.check_events(population)
             next_gen = population.draw_grid(self.screen, gol.settings.alive_color, gol.settings.dead_color, population.grid, gol.settings.cell_size, 1)
             population.grid = next_gen
-            interface.draw_and_update_counter(population,gol)
+            interface.draw_and_update_counter(population, gol, interface.interface_rect.centerx, 20, population.number_of_generations)
+            interface.draw_and_update_pop_counter(population, gol, interface.interface_rect.centerx, 60, population.number_of_living_cells)
             pygame.display.flip()
 
 gol = GameOfLife()
