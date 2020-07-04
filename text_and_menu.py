@@ -5,40 +5,47 @@ import sys
 class Interface:
     def __init__(self, gol, population):
         # Generation counter attributes
-        self.counter_color = (255, 0, 0)
-        self.counter_font = pygame.font.Font('assets/FFFFORWA.TTF', 32)
+        self.counter_color = (219, 179, 123)
+        self.counter_font = pygame.font.Font('assets/FFFFORWA.TTF', 20)
         self.counter_text = self.counter_font.render('0', True, self.counter_color)
         self.counter_rect = self.counter_text.get_rect()
 
         # Population counter attributes
-        self.pop_counter_color = (255, 0, 0)
-        self.pop_counter_font = pygame.font.Font('assets/FFFFORWA.TTF', 32)
+        self.pop_counter_color = (219, 179, 123)
+        self.pop_counter_font = pygame.font.Font('assets/FFFFORWA.TTF', 20)
         self.pop_counter_text = self.pop_counter_font.render('0', True, self.pop_counter_color)
         self.pop_counter_rect = self.pop_counter_text.get_rect()
 
         # Interface board attributes
-        self.interface_bg_color = (50, 0, 0)
-        self.interface_rect = pygame.Rect(gol.settings.scr_height, 0, gol.settings.scr_width-gol.settings.scr_height, gol.settings.scr_height)
+        # self.interface_bg_color = (219, 75, 98)
+        # self.interface_rect = pygame.Rect(gol.settings.scr_height, 0, gol.settings.scr_width-gol.settings.scr_height, gol.settings.scr_height)
+        self.interface_img = pygame.image.load('assets/projekt interfejsu.png')
+        self.interface_rect = self.interface_img.get_rect()
+        self.interface_img_y = 0
+        self.interface_img_x = gol.settings.scr_height
+
 
 
     def draw_bg(self, gol):
-        pygame.draw.rect(gol.screen, self.interface_bg_color, self.interface_rect)
+        # pygame.draw.rect(gol.screen, self.interface_bg_color, self.interface_rect)
+        gol.screen.blit(self.interface_img, (self.interface_img_x, self.interface_img_y))
 
-    def draw_and_update_counter(self, population, gol, centerx, y, things_to_count):
+    def draw_and_update_counter(self, population, gol, things_to_count):
         # self.counter_rect.centerx = self.interface_rect.centerx
         # self.counter_rect.y = 20
-        self.counter_rect.centerx = centerx
-        self.counter_rect.y = y
+        self.counter_rect.centerx = gol.settings.scr_width - self.interface_rect.size[0] / 2
+        self.counter_rect.y = 105
         gol.screen.blit(self.counter_text, self.counter_rect)
         self.counter_text = self.counter_font.render(f'{things_to_count}', True, self.counter_color)
         self.counter_rect = self.counter_text.get_rect()
 
-    def draw_and_update_pop_counter(self, population, gol, centerx, y, things_to_count):
-        self.pop_counter_rect.centerx = centerx
-        self.pop_counter_rect.y = y
+    def draw_and_update_pop_counter(self, population, gol, things_to_count):
+        self.pop_counter_rect.centerx = gol.settings.scr_width - self.interface_rect.size[0] / 2
+        self.pop_counter_rect.y = 40
         gol.screen.blit(self.pop_counter_text, self.pop_counter_rect)
         self.pop_counter_text = self.pop_counter_font.render(f'{things_to_count}', True, self.counter_color)
         self.pop_counter_rect = self.pop_counter_text.get_rect()
+
 
 
 
@@ -141,6 +148,7 @@ class MainMenu:
                     if self.size_button.text != 'size':
                         gol.settings.cell_size = int(self.size_button.text)
 
+
     def draw_menu(self, gol):
         while self.in_menu:
             self.check_menu_events(gol)
@@ -157,6 +165,7 @@ class MainMenu:
             self.size_button.draw_button(gol)
             self.size_l_arrow.draw_arrow(gol, 300)
             self.size_r_arrow.draw_arrow(gol, 650)
+
 
 
             pygame.display.flip()

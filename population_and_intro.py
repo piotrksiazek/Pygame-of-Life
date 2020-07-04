@@ -149,8 +149,8 @@ class Population:
                     pygame.draw.rect(self.screen, alive_color, cell_rect)
                 else:
                     pygame.draw.rect(self.screen, dead_color, cell_rect)
-        interface.draw_and_update_counter(population, gol, interface.interface_rect.centerx, 20, self.number_of_generations)
-        interface.draw_and_update_pop_counter(population, gol, interface.interface_rect.centerx, 60, self.number_of_living_cells)
+        interface.draw_and_update_counter(population, gol, self.number_of_generations)
+        interface.draw_and_update_pop_counter(population, gol, self.number_of_living_cells)
 
 
     def draw_grid(self, screen, alive_color, dead_color, grid, cell_size, align):

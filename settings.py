@@ -3,11 +3,11 @@ from random import randint
 
 class Settings:
     def __init__(self):
-        self.colors_of_life = [(randint(1,255), randint(1,255), randint(1,255)) for x in range(100)]
+        self.colors_of_life = [(255, 79, 51) for x in range(100)]
         self.colors_of_life_intro = [(randint(1,255), randint(1,255), randint(1,255)) for x in range(10)]
         self.dimmer = 255
 
-        self.colors_of_death = [(0,0,0), (20,20,20), (150,150,150), (255,0,0)]
+        self.colors_of_death = [(219, 179, 123), (20,20,20), (150,150,150), (255,0,0)]
         self.max_color_of_life = len(self.colors_of_life) - 1
         self.max_color_of_death = len(self.colors_of_death) - 1
         self.alive_color = self.colors_of_life[0]
