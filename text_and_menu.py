@@ -1,5 +1,10 @@
 import pygame
 import sys
+import tkinter
+from tkinter import filedialog
+from PIL import Image, ImageEnhance
+import numpy as np
+
 
 
 class Interface:
@@ -16,9 +21,13 @@ class Interface:
         self.pop_counter_text = self.pop_counter_font.render('0', True, self.pop_counter_color)
         self.pop_counter_rect = self.pop_counter_text.get_rect()
 
+        # Number of pauses counter attributes
+        self.number_of_pauses_color = (219, 179, 123)
+        self.number_of_pauses_font = pygame.font.Font('assets/FFFFORWA.TTF', 20)
+        self.number_of_pauses_text = self.pop_counter_font.render(str(gol.number_of_pauses), True, self.pop_counter_color)
+        self.number_of_pauses_rect = self.pop_counter_text.get_rect()
+
         # Interface board attributes
-        # self.interface_bg_color = (219, 75, 98)
-        # self.interface_rect = pygame.Rect(gol.settings.scr_height, 0, gol.settings.scr_width-gol.settings.scr_height, gol.settings.scr_height)
         self.interface_img = pygame.image.load('assets/projekt interfejsu.png')
         self.interface_rect = self.interface_img.get_rect()
         self.interface_img_y = 0
@@ -35,16 +44,22 @@ class Interface:
         # self.counter_rect.y = 20
         self.counter_rect.centerx = gol.settings.scr_width - self.interface_rect.size[0] / 2
         self.counter_rect.y = 105
-        gol.screen.blit(self.counter_text, self.counter_rect)
         self.counter_text = self.counter_font.render(f'{things_to_count}', True, self.counter_color)
+        gol.screen.blit(self.counter_text, self.counter_rect)
         self.counter_rect = self.counter_text.get_rect()
 
     def draw_and_update_pop_counter(self, population, gol, things_to_count):
         self.pop_counter_rect.centerx = gol.settings.scr_width - self.interface_rect.size[0] / 2
         self.pop_counter_rect.y = 40
-        gol.screen.blit(self.pop_counter_text, self.pop_counter_rect)
         self.pop_counter_text = self.pop_counter_font.render(f'{things_to_count}', True, self.counter_color)
+        gol.screen.blit(self.pop_counter_text, self.pop_counter_rect)
         self.pop_counter_rect = self.pop_counter_text.get_rect()
+
+    def display_number_of_pauses(self, gol, things_to_count):
+        self.pop_counter_rect.centerx = gol.settings.scr_width - self.interface_rect.size[0] / 2
+        self.pop_counter_rect.y = 200
+        self.pop_counter_text = self.pop_counter_font.render(f'{things_to_count}', True, self.counter_color)
+        gol.screen.blit(self.pop_counter_text, self.pop_counter_rect)
 
 
 
@@ -74,12 +89,6 @@ class Button:
             if x >= self.button_left and x <= self.button_left + self.width and y >= self.top and y <= self.top + self.height:
                 return True
 
-    def button_events(self):
-        pass
-
-    def arrow_events(self):
-        pass
-
     def draw_button(self, gol):
         font = pygame.font.Font('assets/FFFFORWA.TTF', 16)
         text = font.render(self.text, True, self.text_color)
@@ -104,6 +113,7 @@ class Button:
             
 
 class MainMenu:
+    """Class MainMenu stores attributes of all buttons and arrows, draws menu and checks events that may happen while in menu"""
     def __init__(self, gol):
         self.screen = gol.screen
         self.menu_color = (0, 0, 0)
@@ -120,6 +130,41 @@ class MainMenu:
         self.size_button = Button(left=150, top=450, width=200, height=50, text='size', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), gol=gol)
         self.size_l_arrow = Button(left=150, top=450, width=50, height=50, text='<', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), gol=gol)
         self.size_r_arrow = Button(left=150, top=450, width=50, height=50, text='>', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), gol=gol)
+        
+        self.seed_from_image = Button(left=150, top=600, width=200, height=50, text='seed from image', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), gol=gol)
+
+    # functions related to 
+    def get_str_of_img_path(self):
+        root = tkinter.Tk()
+        # Hide tkinter window from sight
+        root.withdraw()
+        file_path = filedialog.askopenfilename()
+        # We don't need tkinter app instance anymore
+        root.destroy()
+        return file_path
+
+    def b_and_w_resized(self):
+        img = Image.open(self.get_str_of_img_path()).convert('L')
+        enhancer = ImageEnhance.Contrast(img)
+        b_and_w = enhancer.enhance(100)
+        resized_im = b_and_w.resize((700, 700))
+        return resized_im
+
+
+    def create_ascii_art(self, b_and_w_resized, gol):
+        gol.grid_from_image = True
+        ascii_chars = [' ', 'o']
+        im = np.array(b_and_w_resized).reshape(700, 700)
+        lista = []
+        for i in range(0, 700, 5):
+            for j in range(0, 700, 5):
+                lista.append(np.mean(im[j:j + 5, i:i + 5], dtype=int))
+        ascii_art = [ascii_chars[pixel // 128] for pixel in lista]
+        im = np.array(ascii_art).reshape(140, 140)
+        with open('obrazek.txt', 'w') as file:
+            for i in im:
+                file.write(''.join(char for char in i))
+                file.write('\n')
 
     def check_menu_events(self, gol):
         for event in pygame.event.get():
@@ -147,6 +192,8 @@ class MainMenu:
                     self.size_button.text = str(gol.settings.menu_cell_size_list[gol.settings.menu_cell_size_list.index(self.size_button.text)-1])
                     if self.size_button.text != 'size':
                         gol.settings.cell_size = int(self.size_button.text)
+                elif self.seed_from_image.is_over(650):
+                    self.create_ascii_art(self.b_and_w_resized(), gol)
 
 
     def draw_menu(self, gol):
@@ -165,7 +212,8 @@ class MainMenu:
             self.size_button.draw_button(gol)
             self.size_l_arrow.draw_arrow(gol, 300)
             self.size_r_arrow.draw_arrow(gol, 650)
-
+            
+            self.seed_from_image.draw_button(gol)
 
 
             pygame.display.flip()

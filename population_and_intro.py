@@ -24,6 +24,14 @@ class Cell:
     def set_dead(self):
         self.status = 0
 
+    def is_alive(self):
+        if self.status == 1:
+            return True
+
+    def is_dead(self):
+        if self.status == 0:
+            return True
+
 class Population:
     """Class that manages and draws the grid, animates the intro"""
     def __init__(self, gol):
@@ -64,14 +72,14 @@ class Population:
         self.number_of_living_cells = sum(sum(1 for grid_cell in row if grid_cell.status == 1) for row in self.grid)
         return self.number_of_living_cells
 
-    def create_snake_grid(self):
+    def create_grid_from_ascii(self, path, grid):
         snake_grid_list = []
-        with open('assets/banner4.txt', 'r') as logo:
+        with open(path, 'r') as logo:
             for line in logo:
                 line = list(line.strip())
                 snake_grid_list.append(line)
 
-        for cell_line, ascii_line in zip(self.snake_grid, snake_grid_list):
+        for cell_line, ascii_line in zip(grid, snake_grid_list):
             for cell_object, ascii_char in zip(cell_line, ascii_line):
                 if ascii_char == ' ':
                     cell_object.set_alive()
@@ -91,7 +99,7 @@ class Population:
         pygame.mixer_music.load('assets/Rick and Morty  Snake Jazz.mp3')
         pygame.mixer_music.play()
 
-        self.create_snake_grid()
+        self.create_grid_from_ascii('assets/banner4.txt', self.snake_grid)
         # colors_of_life_intro index pointer
         i = 0
         while self.intro:
