@@ -21,17 +21,17 @@ class Interface:
         self.pop_counter_text = self.pop_counter_font.render('0', True, self.pop_counter_color)
         self.pop_counter_rect = self.pop_counter_text.get_rect()
 
-        # Number of pauses counter attributes
-        self.number_of_pauses_color = (219, 179, 123)
-        self.number_of_pauses_font = pygame.font.Font('assets/FFFFORWA.TTF', 20)
-        self.number_of_pauses_text = self.pop_counter_font.render(str(gol.number_of_pauses), True, self.pop_counter_color)
-        self.number_of_pauses_rect = self.pop_counter_text.get_rect()
-
         # Interface board attributes
         self.interface_img = pygame.image.load('assets/projekt interfejsu.png')
         self.interface_rect = self.interface_img.get_rect()
         self.interface_img_y = 0
         self.interface_img_x = gol.settings.scr_height
+
+        # Number of pauses counter attributes
+        self.number_of_pauses_color = (219, 179, 123)
+        self.number_of_pauses_font = pygame.font.Font('assets/FFFFORWA.TTF', 20)
+        self.number_of_pauses_text = self.pop_counter_font.render(str(gol.number_of_pauses), True, self.pop_counter_color)
+        self.number_of_pauses_rect = self.pop_counter_text.get_rect()
 
 
 
@@ -46,20 +46,21 @@ class Interface:
         self.counter_rect.y = 105
         self.counter_text = self.counter_font.render(f'{things_to_count}', True, self.counter_color)
         gol.screen.blit(self.counter_text, self.counter_rect)
-        self.counter_rect = self.counter_text.get_rect()
+        # self.counter_rect = self.counter_text.get_rect()
 
     def draw_and_update_pop_counter(self, population, gol, things_to_count):
         self.pop_counter_rect.centerx = gol.settings.scr_width - self.interface_rect.size[0] / 2
         self.pop_counter_rect.y = 40
         self.pop_counter_text = self.pop_counter_font.render(f'{things_to_count}', True, self.counter_color)
         gol.screen.blit(self.pop_counter_text, self.pop_counter_rect)
-        self.pop_counter_rect = self.pop_counter_text.get_rect()
+        # self.pop_counter_rect = self.pop_counter_text.get_rect()
 
     def display_number_of_pauses(self, gol, things_to_count):
-        self.pop_counter_rect.centerx = gol.settings.scr_width - self.interface_rect.size[0] / 2
-        self.pop_counter_rect.y = 200
-        self.pop_counter_text = self.pop_counter_font.render(f'{things_to_count}', True, self.counter_color)
-        gol.screen.blit(self.pop_counter_text, self.pop_counter_rect)
+        self.number_of_pauses_rect.centerx = gol.settings.scr_width - self.interface_rect.size[0] / 2
+        self.number_of_pauses_rect.y = 200
+        self.number_of_pauses_text = self.pop_counter_font.render(f'{things_to_count}', True, self.counter_color)
+        gol.screen.blit(self.number_of_pauses_text, self.number_of_pauses_rect)
+
 
 
 
