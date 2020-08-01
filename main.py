@@ -1,4 +1,4 @@
-import os, sys
+import sys
 import pygame
 from settings import Settings
 import population_and_intro
@@ -15,6 +15,8 @@ class GameOfLife:
         self.playing = True
         self.after_game = True
         self.grid_from_image = False
+        self.grid_image = 0
+        self.b_and_w_resized = 0
         self.number_of_pauses = 3
         self.mode_list = ['mode', 'death', 'life', 'classic']
         self.mode = self.mode_list[0]

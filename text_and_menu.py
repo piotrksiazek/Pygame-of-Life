@@ -143,24 +143,25 @@ class MainMenu:
         root.destroy()
         return file_path
 
-    def b_and_w_resized(self):
+    def b_and_w_resized(self, gol):
+        gol.grid_from_image = True
         img = Image.open(self.get_str_of_img_path()).convert('L')
         enhancer = ImageEnhance.Contrast(img)
         b_and_w = enhancer.enhance(100)
         resized_im = b_and_w.resize((700, 700))
-        return resized_im
+        gol.grid_image = resized_im.transpose(Image.ROTATE_90)
+        return resized_im.transpose(Image.ROTATE_90)
 
 
     def create_ascii_art(self, b_and_w_resized, gol):
-        gol.grid_from_image = True
         ascii_chars = [' ', 'o']
         im = np.array(b_and_w_resized).reshape(700, 700)
         lista = []
-        for i in range(0, 700, 5):
-            for j in range(0, 700, 5):
-                lista.append(np.mean(im[j:j + 5, i:i + 5], dtype=int))
+        for i in range(0, 700, gol.settings.cell_size):
+            for j in range(0, 700, gol.settings.cell_size):
+                lista.append(np.mean(im[j:j + gol.settings.cell_size, i:i + gol.settings.cell_size], dtype=int))
         ascii_art = [ascii_chars[pixel // 128] for pixel in lista]
-        im = np.array(ascii_art).reshape(140, 140)
+        im = np.array(ascii_art).reshape(int(700/gol.settings.cell_size), int(700/gol.settings.cell_size))
         with open('obrazek.txt', 'w') as file:
             for i in im:
                 file.write(''.join(char for char in i))
@@ -183,17 +184,30 @@ class MainMenu:
                     self.mode_button.text = gol.mode_list[gol.mode_list.index(self.mode_button.text)-1]
                     gol.mode = self.mode_button.text
 
+                # Change cell size right arrow
                 elif self.size_r_arrow.is_over(650) and self.size_button.text != gol.settings.menu_cell_size_list[-1]:
                     self.size_button.text = str(gol.settings.menu_cell_size_list[gol.settings.menu_cell_size_list.index(self.size_button.text)+1])
                     # Don't want to cast types if self.size_button.text is literally text.
                     if self.size_button.text != 'size':
                         gol.settings.cell_size = int(self.size_button.text)
+                        # We want to be able to change cell size settings for selected image.
+                        if gol.grid_from_image:
+                            self.create_ascii_art(gol.grid_image, gol)
+
+
+
+
+                # Change cell size left arrow
                 elif self.size_l_arrow.is_over(300) and self.size_button.text != gol.settings.menu_cell_size_list[0]:
                     self.size_button.text = str(gol.settings.menu_cell_size_list[gol.settings.menu_cell_size_list.index(self.size_button.text)-1])
                     if self.size_button.text != 'size':
                         gol.settings.cell_size = int(self.size_button.text)
+                        # We want to be able to change cell size settings for selected image.
+                        if gol.grid_from_image:
+                            self.create_ascii_art(gol.grid_image, gol)
+
                 elif self.seed_from_image.is_over(650):
-                    self.create_ascii_art(self.b_and_w_resized(), gol)
+                    self.create_ascii_art(self.b_and_w_resized(gol), gol)
 
 
     def draw_menu(self, gol):
