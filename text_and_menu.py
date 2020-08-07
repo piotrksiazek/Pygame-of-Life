@@ -66,9 +66,8 @@ class Interface:
 
 
 class Button:
-    def __init__(self, left, top, width, height, text, color, text_color, color_clicked, gol):
+    def __init__(self, left, top, width, height, text, color, text_color, color_clicked, is_arrow):
         self.width = width
-        self.button_left = gol.settings.scr_width / 2 - self.width / 2
         self.left = left
         self.height = height
         self.top = top
@@ -77,40 +76,28 @@ class Button:
         self.color = color
         self.text_color = text_color
         self.color_clicked = color_clicked
-        self.left_arrow = '<'
-        self.right_arrow = '>'
+        self.is_arrow = is_arrow
 
-    def is_over(self, how_far_from_right):
+    def is_over(self):
         # Getting mouse coordinates
         x, y = pygame.mouse.get_pos()
-        if self.text == '<' or self.text == '>':
-            if x >= how_far_from_right and x < how_far_from_right + self.width and y >= self.top and y <= self.top + self.height:
-                return True
-        else:
-            if x >= self.button_left and x <= self.button_left + self.width and y >= self.top and y <= self.top + self.height:
-                return True
+        if x >= self.left and x < self.left + self.width and y >= self.top and y <= self.top + self.height:
+            return True
+
 
     def draw_button(self, gol):
         font = pygame.font.Font('assets/FFFFORWA.TTF', 16)
         text = font.render(self.text, True, self.text_color)
         text_rect = text.get_rect()
-        text_rect.center = (gol.settings.scr_width/2, self.top + self.height/2)
-        # pygame.draw.rect(gol.screen, self.color, (gol.settings.scr_width/2-self.width/2, self.top, self.width, self.height), 0)
-        pygame.draw.rect(gol.screen, self.color, (self.button_left, self.top, self.width, self.height), 0)
+
+        # arrow and regular buttons have different centering
+        if self.is_arrow:
+            text_rect.center = (self.left + self.width / 2, self.top + self.height / 2)
+        else:
+            text_rect.center = (gol.settings.scr_width/2, self.top + self.height/2)
+        pygame.draw.rect(gol.screen, self.color, (self.left, self.top, self.width, self.height), 0)
         gol.screen.blit(text, text_rect)
 
-    def draw_arrow(self, gol, how_far_from_right):
-        font = pygame.font.Font('assets/FFFFORWA.TTF', 16)
-        text = font.render(self.text, True, self.text_color)
-        text_rect = text.get_rect()
-        text_rect.center = (how_far_from_right + self.width/2, self.top + self.height/2)
-        if self.text == '<':
-            # pygame.draw.rect(gol.screen, self.color, (how_far_from_right, self.top, self.width, self.height), 0)
-            pygame.draw.rect(gol.screen, self.color, (how_far_from_right, self.top, self.width, self.height), 0)
-            gol.screen.blit(text, text_rect)
-        elif self.text == '>':
-            pygame.draw.rect(gol.screen, self.color, (how_far_from_right, self.top, self.width, self.height), 0)
-            gol.screen.blit(text, text_rect)
             
 
 class MainMenu:
@@ -120,19 +107,19 @@ class MainMenu:
         self.menu_color = (0, 0, 0)
         self.in_menu = True
 
-        self.mode_button = Button(left=150, top=150, width=200, height=50, text=gol.mode, color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), gol=gol)
-        self.mode_l_arrow = Button(left=150, top=150, width=50, height=50, text='<', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), gol=gol)
-        self.mode_r_arrow = Button(left=150, top=150, width=50, height=50, text='>', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), gol=gol)
+        self.mode_button = Button(left=400, top=150, width=200, height=50, text=gol.mode, color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), is_arrow=False)
+        self.mode_l_arrow = Button(left=300, top=150, width=50, height=50, text='<', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), is_arrow=True)
+        self.mode_r_arrow = Button(left=650, top=150, width=50, height=50, text='>', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), is_arrow=True)
 
-        self.color_button = Button(left=150, top=300, width=200, height=50, text='color', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), gol=gol)
-        self.color_l_arrow = Button(left=150, top=300, width=50, height=50, text='<', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), gol=gol)
-        self.color_r_arrow = Button(left=150, top=300, width=50, height=50, text='>', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), gol=gol)
+        self.color_button = Button(left=400, top=300, width=200, height=50, text='color', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), is_arrow=False)
+        self.color_l_arrow = Button(left=300, top=300, width=50, height=50, text='<', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), is_arrow=True)
+        self.color_r_arrow = Button(left=650, top=300, width=50, height=50, text='>', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), is_arrow=True)
 
-        self.size_button = Button(left=150, top=450, width=200, height=50, text='size', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), gol=gol)
-        self.size_l_arrow = Button(left=150, top=450, width=50, height=50, text='<', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), gol=gol)
-        self.size_r_arrow = Button(left=150, top=450, width=50, height=50, text='>', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), gol=gol)
+        self.size_button = Button(left=400, top=450, width=200, height=50, text='size', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), is_arrow=False)
+        self.size_l_arrow = Button(left=300, top=450, width=50, height=50, text='<', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), is_arrow=True)
+        self.size_r_arrow = Button(left=650, top=450, width=50, height=50, text='>', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), is_arrow=True)
         
-        self.seed_from_image = Button(left=150, top=600, width=200, height=50, text='seed from image', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), gol=gol)
+        self.seed_from_image = Button(left=400, top=600, width=200, height=50, text='seed from image', color=(255,0,0), text_color=(0,0,0), color_clicked=(0,255,0), is_arrow=False)
 
     # functions related to 
     def get_str_of_img_path(self):
@@ -177,16 +164,16 @@ class MainMenu:
                     self.in_menu = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 # Don't want to exceed max index.
-                if self.mode_r_arrow.is_over(650) and self.mode_button.text != gol.mode_list[-1]:
+                if self.mode_r_arrow.is_over() and self.mode_button.text != gol.mode_list[-1]:
                     self.mode_button.text = gol.mode_list[gol.mode_list.index(self.mode_button.text)+1]
                     gol.mode = self.mode_button.text
                 # Don't want to go below 0 index.
-                elif self.mode_l_arrow.is_over(300) and self.mode_button.text != gol.mode_list[0]:
+                elif self.mode_l_arrow.is_over() and self.mode_button.text != gol.mode_list[0]:
                     self.mode_button.text = gol.mode_list[gol.mode_list.index(self.mode_button.text)-1]
                     gol.mode = self.mode_button.text
 
                 # Change cell size right arrow
-                elif self.size_r_arrow.is_over(650) and self.size_button.text != gol.settings.menu_cell_size_list[-1]:
+                elif self.size_r_arrow.is_over() and self.size_button.text != gol.settings.menu_cell_size_list[-1]:
                     self.size_button.text = str(gol.settings.menu_cell_size_list[gol.settings.menu_cell_size_list.index(self.size_button.text)+1])
                     # Don't want to cast types if self.size_button.text is literally text.
                     if self.size_button.text != 'size':
@@ -199,7 +186,7 @@ class MainMenu:
 
 
                 # Change cell size left arrow
-                elif self.size_l_arrow.is_over(300) and self.size_button.text != gol.settings.menu_cell_size_list[0]:
+                elif self.size_l_arrow.is_over() and self.size_button.text != gol.settings.menu_cell_size_list[0]:
                     self.size_button.text = str(gol.settings.menu_cell_size_list[gol.settings.menu_cell_size_list.index(self.size_button.text)-1])
                     if self.size_button.text != 'size':
                         gol.settings.cell_size = int(self.size_button.text)
@@ -207,7 +194,7 @@ class MainMenu:
                         if gol.grid_from_image:
                             self.create_ascii_art(gol.grid_image, gol)
 
-                elif self.seed_from_image.is_over(650):
+                elif self.seed_from_image.is_over():
                     self.create_ascii_art(self.b_and_w_resized(gol), gol)
 
 
@@ -217,16 +204,16 @@ class MainMenu:
             self.screen.fill(self.menu_color)
 
             self.mode_button.draw_button(gol)
-            self.mode_l_arrow.draw_arrow(gol, 300)
-            self.mode_r_arrow.draw_arrow(gol, 650)
+            self.mode_l_arrow.draw_button(gol)
+            self.mode_r_arrow.draw_button(gol)
 
             self.color_button.draw_button(gol)
-            self.color_l_arrow.draw_arrow(gol, 300)
-            self.color_r_arrow.draw_arrow(gol, 650)
+            self.color_l_arrow.draw_button(gol)
+            self.color_r_arrow.draw_button(gol)
             
             self.size_button.draw_button(gol)
-            self.size_l_arrow.draw_arrow(gol, 300)
-            self.size_r_arrow.draw_arrow(gol, 650)
+            self.size_l_arrow.draw_button(gol)
+            self.size_r_arrow.draw_button(gol)
             
             self.seed_from_image.draw_button(gol)
 

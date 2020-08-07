@@ -35,6 +35,7 @@ class GameOfLife:
                         self.number_of_pauses -= 1
                     else:
                         self.playing = False
+
     def gameplay(self, interface, population, gol):
         # self.playing brakes once player spends all pause points.
         while self.playing:
@@ -64,7 +65,7 @@ class GameOfLife:
         intro.create_grid_from_ascii('assets/banner4.txt', intro.snake_grid)
         menu = text_and_menu.MainMenu(gol)
 
-        intro.animate_snake_grid(intro, gol)
+        # intro.animate_snake_grid(intro, gol)
         menu.draw_menu(gol)
 
         population = population_and_intro.Population(gol)

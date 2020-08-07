@@ -20,6 +20,6 @@ class Settings:
         self.scr_height = 700
 
         self.menu_cell_size_list = ['size', '20', '10', '2']
-        self.cell_size_list = [20, 10, 5]
+        self.cell_size_list = [20, 10, 1]
         self.cell_size = self.cell_size_list[0]
         self.intro_cell_size = 5
