@@ -25,7 +25,7 @@ class Interface:
         self.pause_counter_y = 200
 
         # Interface board attributes
-        self.interface_img = pygame.image.load('assets/projekt interfejsu.png')
+        self.interface_img = pygame.image.load('assets/interface_bg.png')
         self.interface_rect = self.interface_img.get_rect()
         self.vertical_center = gol.settings.scr_width - self.interface_rect.size[0] / 2
         self.interface_img_y = 0
@@ -172,7 +172,7 @@ class MainMenu:
                     lista.append(np.mean(im[j:j + gol.settings.cell_size, i:i + gol.settings.cell_size], dtype=int))
             ascii_art = [ascii_chars[pixel // 128] for pixel in lista]
             im = np.array(ascii_art).reshape(int(700/gol.settings.cell_size), int(700/gol.settings.cell_size))
-            with open('obrazek.txt', 'w') as file:
+            with open('ascii_art.txt', 'w') as file:
                 for i in im:
                     file.write(''.join(char for char in i))
                     file.write('\n')

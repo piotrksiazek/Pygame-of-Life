@@ -54,7 +54,7 @@ class GameOfLife:
                     elif menu.seed_from_image.is_over() and self.paused:
                         menu.create_ascii_art(menu.b_and_w_resized(gol, menu.get_str_of_img_path(), interface), gol)
                         if menu.image_open_success:
-                            population.create_grid_from_ascii('obrazek.txt', population.grid)
+                            population.create_grid_from_ascii('ascii_art.txt', population.grid)
                             self.grid_from_image = True
 
                     elif menu.hoffmans_dream_button.is_over():
@@ -75,7 +75,7 @@ class GameOfLife:
                             # We want to be able to change cell size settings for selected image.
                             if gol.grid_from_image:
                                 menu.create_ascii_art(menu.b_and_w_resized(gol, menu.image_path, interface), gol)
-                                population.create_grid_from_ascii('obrazek.txt', population.grid)
+                                population.create_grid_from_ascii('ascii_art.txt', population.grid)
 
 
                     # Change cell size left arrow
@@ -87,7 +87,7 @@ class GameOfLife:
                             # We want to be able to change cell size settings for selected image.
                             if gol.grid_from_image:
                                 menu.create_ascii_art(menu.b_and_w_resized(gol, menu.image_path, interface), gol)
-                                population.create_grid_from_ascii('obrazek.txt', population.grid)
+                                population.create_grid_from_ascii('ascii_art', population.grid)
 
 
                     elif menu.pause_button.is_over():
