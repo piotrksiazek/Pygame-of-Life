@@ -2,7 +2,6 @@ import pygame
 import numpy as np
 import sys
 import copy
-from random import randint
 
 class Cell:
     """Class that stores state of each individual cell"""
@@ -33,7 +32,7 @@ class Cell:
             return True
 
 class Population:
-    """Class that manages and draws the grid, animates the intro"""
+    """Class that manages and draws the grid, animates the intro, updates popultaion counters"""
     def __init__(self, gol):
         self.screen = pygame.display.set_mode((gol.settings.scr_width, gol.settings.scr_height))
         self.cell_size = gol.settings.cell_size
@@ -54,19 +53,22 @@ class Population:
         self.intro = True
         self.intro_speed = 420
 
-        # Used only to display "Pygame of life" and "Click to continue" at the beginnging.
-        self.text_intro_color = (255, 0, 0)
-        self.text_fade_speed = 400
 
         self.title_font = pygame.font.Font('assets/FFFFORWA.TTF', 32)
-        self.title_text = self.title_font.render('Pygame of Life', True, self.text_intro_color)
+        self.title_text = self.title_font.render('Pygame of Life', True, (255, 0, 0))
         self.title_rect = self.title_text.get_rect()
         self.title_rect.center = (gol.settings.scr_width // 2, gol.settings.scr_height // 2)
 
         self.continue_font = pygame.font.Font('assets/FFFFORWA.TTF', 10)
-        self.continue_text = self.continue_font.render('PRESS ANYTHING TO CONTINUE', True, self.text_intro_color)
+        self.continue_text = self.continue_font.render('PRESS ANYTHING TO CONTINUE', True, (255, 0, 0))
         self.continue_rect = self.title_text.get_rect()
-        self.continue_rect.center = (0.57*gol.settings.scr_width, gol.settings.scr_height)
+        self.continue_rect.center = (gol.settings.scr_width*0.57, gol.settings.scr_height)
+
+    # Used when user changes cell size in menu
+    def update_grid_with_cell_size(self, gol):
+        self.rows = int(self.height / gol.settings.cell_size)
+        self.columns = int(self.height / gol.settings.cell_size)
+        self.grid = np.array([[Cell() for column in range(self.columns)] for row in range(self.rows)])
 
     def count_living_cells(self):
         self.number_of_living_cells = sum(sum(1 for grid_cell in row if grid_cell.status == 1) for row in self.grid)
@@ -130,36 +132,46 @@ class Population:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                # Getting x and y coordinate of coursor and translating it into individual cell position
-                x, y = pygame.mouse.get_pos()
-                pos_x, pos_y = int(x/self.cell_size), int(y/self.cell_size)
-                # Cell status can be changed only in a square plane.
-                if x < gol.settings.scr_height:
-                    # If cell is alive then it's status will become dead
-                    if grid[pos_y][pos_x].status == 1:
-                        grid[pos_y][pos_x].status = 0
-                    # If cell is dead then it's status will become alive
-                    else:
-                        grid[pos_y][pos_x].status = 1
+            # elif event.type == pygame.MOUSEBUTTONDOWN:
+            #     # Getting x and y coordinate of coursor and translating it into individual cell position
+            #     x, y = pygame.mouse.get_pos()
+            #     pos_x, pos_y = int(x/self.cell_size), int(y/self.cell_size)
+            #     # Cell status can be changed only in a square plane.
+            #     if x < gol.settings.scr_height:
+            #         # If cell is alive then it's status will become dead
+            #         if grid[pos_y][pos_x].status == 1:
+            #             grid[pos_y][pos_x].status = 0
+            #         # If cell is dead then it's status will become alive
+            #         else:
+            #             grid[pos_y][pos_x].status = 1
             elif event.type == pygame.KEYDOWN:
                 # Press space to start the game
                 if event.key == pygame.K_SPACE:
                     gol.paused = False
 
     def pre_game(self, grid, alive_color, dead_color, gol, interface, population):
-        self.pre_populate_events(grid, gol)
         for y in range(len(grid)):
             # We don't iterate over particular sublist but just want to get the length of x axis.
             for x in range(len(grid[0])):
-                cell_rect = pygame.Rect(x*self.cell_size, y*self.cell_size, self.cell_size, self.cell_size)
+                cell_rect = pygame.Rect(x*gol.settings.cell_size, y*gol.settings.cell_size, gol.settings.cell_size, gol.settings.cell_size)
                 if grid[y][x].status == 1:
                     pygame.draw.rect(self.screen, alive_color, cell_rect)
                 else:
                     pygame.draw.rect(self.screen, dead_color, cell_rect)
-        interface.draw_and_update_counter(population, gol, self.number_of_generations)
-        interface.draw_and_update_pop_counter(population, gol, self.number_of_living_cells)
+        # Generation counter
+        interface.draw_and_update_counter(gol, population.number_of_generations, interface.vertical_center, interface.generation_counter_y)
+        # Population counter
+        interface.draw_and_update_counter(gol, population.count_living_cells(), interface.vertical_center, interface.population_counter_y)
 
+    def redraw_cells_after_size_change(self, grid, screen, alive_color, dead_color, gol):
+        for y in range(len(grid)):
+            for x in range(len(grid[0])):
+                cell = grid[y][x]
+                cell_rect = pygame.Rect(x * gol.settings.cell_size, y * gol.settings.cell_size, gol.settings.cell_size, gol.settings.cell_size)
+                if cell.status == 1:
+                    pygame.draw.rect(screen, alive_color, cell_rect)
+                else:
+                    pygame.draw.rect(screen, dead_color, cell_rect)
 
     def draw_grid(self, screen, alive_color, dead_color, grid, cell_size, align):
         next_generation = copy.deepcopy(grid)
@@ -220,6 +232,7 @@ class Population:
                 cell.change_status()
 
                 cell_rect = pygame.Rect(align*x*cell_size, y*cell_size, cell_size, cell_size)
+
                 if cell.status == 1:
                     pygame.draw.rect(screen, alive_color, cell_rect)
                 else:
