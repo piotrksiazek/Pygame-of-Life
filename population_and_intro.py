@@ -132,18 +132,6 @@ class Population:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
-            # elif event.type == pygame.MOUSEBUTTONDOWN:
-            #     # Getting x and y coordinate of coursor and translating it into individual cell position
-            #     x, y = pygame.mouse.get_pos()
-            #     pos_x, pos_y = int(x/self.cell_size), int(y/self.cell_size)
-            #     # Cell status can be changed only in a square plane.
-            #     if x < gol.settings.scr_height:
-            #         # If cell is alive then it's status will become dead
-            #         if grid[pos_y][pos_x].status == 1:
-            #             grid[pos_y][pos_x].status = 0
-            #         # If cell is dead then it's status will become alive
-            #         else:
-            #             grid[pos_y][pos_x].status = 1
             elif event.type == pygame.KEYDOWN:
                 # Press space to start the game
                 if event.key == pygame.K_SPACE:

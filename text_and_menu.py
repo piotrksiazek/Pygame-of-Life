@@ -8,7 +8,7 @@ import numpy as np
 
 
 class Interface:
-    def __init__(self, gol, population):
+    def __init__(self, gol):
         # General counter attributes
         self.counter_color = (219, 179, 123)
         self.counter_font = pygame.font.Font('assets/FFFFORWA.TTF', 20)
@@ -48,11 +48,8 @@ class Interface:
         interface.draw_and_update_counter(gol, population.count_living_cells(), interface.vertical_center, interface.population_counter_y)
 
 
-
-
-
-
 class Button:
+    """Class stores button's content, size and methods cheking if mouse is over and drawing buttons"""
     def __init__(self, left, top, width, height, text, color, text_color, color_clicked, is_arrow):
         self.width = width
         self.left = left
@@ -122,7 +119,7 @@ class MainMenu:
         self.image_open_success = False
         self.is_error = False
         self.error_message = ""
-    # functions related to 
+
     def get_str_of_img_path(self):
         root = tkinter.Tk()
         # Hide tkinter window from sight

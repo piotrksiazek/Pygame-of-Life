@@ -13,8 +13,6 @@ class GameOfLife:
         self.settings = Settings()
         self.screen = pygame.display.set_mode((self.settings.scr_width, self.settings.scr_height))
         self.paused = True
-        self.playing = True
-        self.after_game = True
         self.grid_from_image = False
         self.is_hoffman_dreaming = False
 
@@ -87,7 +85,7 @@ class GameOfLife:
                             # We want to be able to change cell size settings for selected image.
                             if gol.grid_from_image:
                                 menu.create_ascii_art(menu.b_and_w_resized(gol, menu.image_path, interface), gol)
-                                population.create_grid_from_ascii('ascii_art', population.grid)
+                                population.create_grid_from_ascii('ascii_art.txt', population.grid)
 
 
                     elif menu.pause_button.is_over():
@@ -133,8 +131,7 @@ class GameOfLife:
         pygame.display.flip()
 
     def gameplay(self, interface, population, gol, menu):
-        # self.playing brakes once player spends all pause points.
-        while self.playing:
+        while True:
             pygame.time.delay(100)
             while self.paused:
                 population.pre_game(population.grid, gol.settings.alive_color, gol.settings.dead_color, gol, interface, population)
@@ -147,20 +144,13 @@ class GameOfLife:
     def main(self):
         intro = population_and_intro.Population(gol)
         intro.create_grid_from_ascii('assets/banner4.txt', intro.snake_grid)
-        # menu = text_and_menu.MainMenu(gol)
-
-        # intro.animate_snake_grid(intro, gol)
-
-        # menu.draw_menu(gol)
+        intro.animate_snake_grid(intro, gol)
 
         population = population_and_intro.Population(gol)
-        interface = text_and_menu.Interface(gol, population)
+        interface = text_and_menu.Interface(gol)
         menu = text_and_menu.MainMenu(gol, interface)
         # After intro and menus are over.
         self.gameplay(interface, population, gol, menu)
-
-        while self.after_game:
-            pass
 
 gol = GameOfLife()
 gol.main()
